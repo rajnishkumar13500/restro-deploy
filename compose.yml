@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysqldb
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: restaurantdb
+    ports:
+      - "3303:3306"  
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+    restart: always  
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_app
+    env_file:
+      - .env
+    ports:
+      - "8080:4000"  
+    depends_on:
+      - mysqldb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["./entrypoint.sh"]  
+
+volumes:
+  mysql_data: {}

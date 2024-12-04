@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+  model Owner{
+  id             String   @id     @default(uuid())
+  name           String
+  email          String   @unique
+  phone          String   @unique
+  img            String?
+  status         Boolean?  @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime   @updatedAt
+  users           User[]
+}
+
+model User {
+  id            String      @id @default(uuid())
+  name          String
+  address       String
+  aadhaar       String
+  pan_card      String
+  restaurant    Restaurant? @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id String?
+  role_id       String
+  email         String      @unique
+  phone         String      @unique
+  password      String
+  status        Boolean
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  root_id       String
+  root          Owner   @relation(fields: [root_id], references: [id], onDelete: Cascade)
+  role          Role        @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  documents     Documents[]
+}
+
+model Permission {
+  id         String      @id @default(uuid()) 
+  name       String      @unique
+  roles      Role[]      @relation("RolePermissions") 
+}
+
+model Role {
+  id         String         @id @default(uuid()) 
+  name       String         @unique
+  permissions Permission[]   @relation("RolePermissions") 
+  users      User[]        
+}
+
+model Restaurant {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  phone         String
+  description   String
+  reg_number    String
+  res_address   String
+  pincode       String
+  res_location  String
+  opening_hours String
+  closing_hours String
+  cuisine_type  String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  users         User[]
+  Images        Images[]
+}
+
+model Images {
+  id         String      @id @default(uuid())
+  name       String
+  link       String
+  Status     String
+  res_id     String
+  restaurant Restaurant? @relation(fields: [res_id], references: [id], onDelete: Cascade)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+}
+ 
+ model Auth {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  role     UserRole @default(Owner)
+  userId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("Auth")
+}
+
+model forgotPassword{
+  id           String      @id     @default(uuid())
+  email        String      @unique
+  otp          String?
+  expiresAt    DateTime   @default(now())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model UserVerfication {
+  id           String      @id     @default(uuid())
+  email        String      @unique
+  otp          String?
+  password     String
+  expiresAt    DateTime?   @default(now())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  @@map("UserVerfication")
+}
+
+model Customer{
+  id             String   @id     @default(uuid())
+  name           String
+  email          String?   @unique
+  phone          String?   @unique
+  img            String?
+  status         Boolean?  @default(false)
+}
+enum UserRole{
+  Owner
+  User
+}
+
+model Documents {
+  id         String   @id @default(uuid())
+  name       String
+  link       String
+  status     String
+  user_id    String
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model Otp {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  otp       String
+  expiresAt DateTime? @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
